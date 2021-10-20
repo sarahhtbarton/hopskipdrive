@@ -26,46 +26,40 @@ def rides():
     """View ranked rides."""
 
     full_name = request.args.get('full-name')
-    print(full_name) #returning None right now -- not getting the name -- need `name=full-name` in html, not `id=full-name`
     driver_address = db.session.query(Drivers.home_address).filter_by(full_name=full_name).one()
-
     all_rides = Rides.query.all()
 
     drivers_rides = {}
-    for record in all_rides:
-        drivers_rides[record.ride_id] = {}
-        drivers_rides[record.ride_id]['driver_address'] = driver_address.home_address
-        drivers_rides[record.ride_id]['start_address'] = record.start_address
-        drivers_rides[record.ride_id]['end_address'] = record.end_address
-
-
-
-    # url = f"https://maps.googleapis.com/maps/api/directions/json?\
-    #             origin=place_id:{drivers_rides[1]['driver_address']}&\
-    #             waypoint=place_id:{drivers_rides[1]['start_address']}&\
-    #             destination=place_id:{drivers_rides[1]['end_address']}&\
-    #             key={API_KEY}"
-
-    # response = requests.get(url)
-    # return response.json()      # does .load() to response to make it a python dictionary
-
-
 
     endpoint = 'https://maps.googleapis.com/maps/api/directions/json?'
 
-    parameters = {
-        'origin': f"place_id:{drivers_rides[1]['driver_address']}",
-        'waypoint': f"place_id:{drivers_rides[1]['start_address']}",
-        'destination': f"place_id:{drivers_rides[1]['end_address']}",
-        'key': API_KEY
-    }
+    for record in all_rides:
+        parameters = {
+            'origin': f"place_id:{driver_address.home_address}",
+            'waypoints': f"place_id:{record.start_address}",
+            'destination': f"place_id:{record.end_address}",
+            'key': API_KEY
+        }
 
+        response = requests.get(endpoint, parameters)
+        dict_response = response.json()
+        print('******* DICT RESPONSE *********')
+        print(dict_response)
 
-    response = requests.get(endpoint, parameters)
-    print(response.url) #just prints out the url string with all the parameters included
-    print(response.json())
+        drivers_rides[record.ride_id] = {}
+        drivers_rides[record.ride_id]['leg1'] = {}
+        drivers_rides[record.ride_id]['leg1']['start_address'] = dict_response['routes'][0]['legs'][0]['start_address']
+        drivers_rides[record.ride_id]['leg1']['end_address'] = dict_response['routes'][0]['legs'][0]['end_address']
+        drivers_rides[record.ride_id]['leg1']['distance'] = dict_response['routes'][0]['legs'][0]['distance']['text']
+        drivers_rides[record.ride_id]['leg1']['duration'] = dict_response['routes'][0]['legs'][0]['duration']['text']
+        drivers_rides[record.ride_id]['leg2'] = {}
+        drivers_rides[record.ride_id]['leg2']['start_address'] = dict_response['routes'][0]['legs'][1]['start_address']
+        drivers_rides[record.ride_id]['leg2']['end_address'] = dict_response['routes'][0]['legs'][1]['end_address']
+        drivers_rides[record.ride_id]['leg2']['distance'] = dict_response['routes'][0]['legs'][1]['distance']['text']
+        drivers_rides[record.ride_id]['leg2']['duration'] = dict_response['routes'][0]['legs'][1]['duration']['text']
     
-    return response.json()
+    return render_template("rides.html",
+                           drivers_rides=drivers_rides)
 
 
 if __name__ == '__main__':
