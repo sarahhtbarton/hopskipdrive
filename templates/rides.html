@@ -17,12 +17,12 @@
           </tr>
         </thead>
         <tbody>
-        {% for ride in drivers_rides %}
+        {% for ride in scores %}
           <tr>
-            <th scope="row"> {{ drivers_rides[ride]["leg1"]["distance"] }}</th>
-            <td>{{ drivers_rides[ride]["leg1"]["duration"] }}</td>
-            <td>{{ drivers_rides[ride]["leg2"]["start_address"] }}</td>
-            <td>{{ drivers_rides[ride]["leg2"]["end_address"] }}</td>
+            <th scope="row"> {{ ride }}</th>
+            <td>${{ scores[ride]['earnings'] }}</td>
+            <td>{{ scores[ride]['start_address'] }}</td>
+            <td>{{ scores[ride]['end_address'] }}</td>
           </tr>
         {% endfor %}
         </tbody>

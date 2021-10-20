@@ -5,6 +5,7 @@ import requests
 from jinja2 import StrictUndefined
 from model import connect_to_db, db, Drivers, Rides
 import crud
+from math import trunc
 
 
 app = Flask(__name__)
@@ -43,23 +44,25 @@ def rides():
 
         response = requests.get(endpoint, parameters)
         dict_response = response.json()
-        print('******* DICT RESPONSE *********')
-        print(dict_response)
 
-        drivers_rides[record.ride_id] = {}
-        drivers_rides[record.ride_id]['leg1'] = {}
-        drivers_rides[record.ride_id]['leg1']['start_address'] = dict_response['routes'][0]['legs'][0]['start_address']
-        drivers_rides[record.ride_id]['leg1']['end_address'] = dict_response['routes'][0]['legs'][0]['end_address']
-        drivers_rides[record.ride_id]['leg1']['distance'] = dict_response['routes'][0]['legs'][0]['distance']['text']
-        drivers_rides[record.ride_id]['leg1']['duration'] = dict_response['routes'][0]['legs'][0]['duration']['text']
-        drivers_rides[record.ride_id]['leg2'] = {}
-        drivers_rides[record.ride_id]['leg2']['start_address'] = dict_response['routes'][0]['legs'][1]['start_address']
-        drivers_rides[record.ride_id]['leg2']['end_address'] = dict_response['routes'][0]['legs'][1]['end_address']
-        drivers_rides[record.ride_id]['leg2']['distance'] = dict_response['routes'][0]['legs'][1]['distance']['text']
-        drivers_rides[record.ride_id]['leg2']['duration'] = dict_response['routes'][0]['legs'][1]['duration']['text']
+        ride_distance = float((dict_response['routes'][0]['legs'][1]['distance']['text'])[:-3])
+        ride_duration = float((dict_response['routes'][0]['legs'][1]['duration']['text'])[:-5])
+        commute_duration = float((dict_response['routes'][0]['legs'][0]['duration']['text'])[:-5])
+        earnings = (ride_distance * .5) + (ride_duration * 15/60)
+        score = trunc(earnings / (commute_duration + ride_duration) * 100)
+
+        drivers_rides[score] = {}
+        drivers_rides[score]['earnings'] = earnings
+        drivers_rides[score]['start_address'] = dict_response['routes'][0]['legs'][1]['start_address']
+        drivers_rides[score]['end_address'] = dict_response['routes'][0]['legs'][1]['end_address']
+
+    scores = dict(sorted(drivers_rides.items(), key=lambda kv: kv[0], reverse=True))
+
+    print(type(scores))
+    print(scores)
     
     return render_template("rides.html",
-                           drivers_rides=drivers_rides)
+                           scores=scores)
 
 
 if __name__ == '__main__':
