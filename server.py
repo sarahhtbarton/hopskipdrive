@@ -3,15 +3,15 @@
 from flask import Flask, render_template, request, flash, session, redirect, jsonify
 import requests
 from jinja2 import StrictUndefined
-from model import connect_to_db, Drivers, Rides
+from model import connect_to_db, db, Drivers, Rides
 import crud
 
 
 app = Flask(__name__)
-app.secret_key = "dev"
+# app.secret_key = "dev" #only used for session?
 app.jinja_env.undefined = StrictUndefined
 
-API_KEY = os.environ['GOOGLE_MAPS_KEY']
+API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
 
 
 @app.route('/')
@@ -25,7 +25,8 @@ def homepage():
 def rides():
     """View ranked rides."""
 
-    full_name = request.form.get('full-name')
+    full_name = request.args.get('full-name')
+    print(full_name) #returning None right now -- not getting the name -- need `name=full-name` in html, not `id=full-name`
     driver_address = db.session.query(Drivers.home_address).filter_by(full_name=full_name).one()
 
     all_rides = Rides.query.all()
@@ -68,4 +69,5 @@ def rides():
 
 
 if __name__ == '__main__':
+    connect_to_db(app)
     app.run(host='0.0.0.0', debug=True) 
