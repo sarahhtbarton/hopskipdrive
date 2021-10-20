@@ -3,10 +3,12 @@
 from model import db, connect_to_db, Drivers, Rides
 
 
-def create_driver(full_name, home_address):
+def create_driver(full_name, email, password, home_address):
     """Create and return a new driver."""
 
     driver = Drivers(full_name=full_name,
+                     email=email,
+                     password=password,
                      home_address=home_address)
     
     db.session.add(driver)

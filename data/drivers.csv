@@ -1,8 +1,8 @@
-full_name,place_id,,,,,
-Emily Gomeztagle,ChIJK1kRwA1-j4ARhzqfL4bZizM,,,,,
-Will Fox,ChIJ6eoeVa6AhYARplZZR-eY7xc,,,,,
-Sugam Arora,ChIJuQXLMu6AhYARWO-no9XVPI8,,,,,
-Logan Franey,ChIJbxodwkOLj4ARApLMCoAeBjk,,,,,
-Will Barton,ChIJAUVJrY9-hYARb21n_qISEXw,,,,,
-Kacy Barton,ChIJpYmvw1mHj4ARJrMBNNezeQA,,,,,
-Lisa Derezin,ChIJ24XiZNr0j4ARITpvYjqjrw0,,,,,
+full_name,email,password,place_id
+Emily Gomeztagle,emily@gmail.com,password123,ChIJK1kRwA1-j4ARhzqfL4bZizM
+Will Fox,will@gmail.com,password123,ChIJ6eoeVa6AhYARplZZR-eY7xc
+Sugam Arora,sugam@gmail.com,password123,ChIJuQXLMu6AhYARWO-no9XVPI8
+Logan Franey,logan@gmail.com,password123,ChIJbxodwkOLj4ARApLMCoAeBjk
+Will Barton,willbarton@gmail.com,password123,ChIJAUVJrY9-hYARb21n_qISEXw
+Kacy Barton,kacy@gmail.com,password123,ChIJpYmvw1mHj4ARJrMBNNezeQA
+Lisa Derezin,lisa@gmail.com,password123,ChIJ24XiZNr0j4ARITpvYjqjrw0

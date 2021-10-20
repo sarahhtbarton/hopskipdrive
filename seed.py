@@ -13,8 +13,10 @@ def seed_drivers():
     with open('data/drivers.csv', newline='') as drivers_csv:
         drivers_reader = csv.DictReader(drivers_csv)
         for row in drivers_reader:
-            crud.create_driver(row['full_name'], 
-                            row['place_id'])
+            crud.create_driver(row['full_name'],
+                               row['email'],
+                               row['password'],
+                               row['place_id'])
 
 
 def seed_rides():

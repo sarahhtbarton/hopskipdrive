@@ -14,11 +14,13 @@ class Drivers(db.Model):
                           autoincrement=True,
                           primary_key=True)
     full_name = db.Column(db.String)
+    email = db.Column(db.String)
+    password = db.Column(db.String)
     home_address = db.Column(db.String)
 
     def __repr__(self):
         """Show info about Drivers"""
-        return f"<Drivers driver_id={self.driver_id} home_address={self.home_address}>"
+        return f"<Drivers driver_id={self.driver_id} email={self.email}>"
 
 
 class Rides(db.Model):
