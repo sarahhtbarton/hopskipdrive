@@ -7,26 +7,35 @@
 
 {% block body %}
 <div class="container">
-    <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Score</th>
-            <th scope="col">Earnings</th>
-            <th scope="col">Start Address</th>
-            <th scope="col">End Address</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for ride in scores %}
-          <tr>
-            <th scope="row"> {{ ride }}</th>
-            <td>${{ scores[ride]['earnings'] }}</td>
-            <td>{{ scores[ride]['start_address'] }}</td>
-            <td>{{ scores[ride]['end_address'] }}</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+
+  <div>
+    {% if session.get('driver_full_name') %}
+      <p class="text-end">Welcome {{ session['driver_full_name'] }}</p>
+    {% else %}
+      <p class="text-end">Not Logged In</p> 
+    {% endif %}
+  </div>
+
+  <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Score</th>
+          <th scope="col">Earnings</th>
+          <th scope="col">Start Address</th>
+          <th scope="col">End Address</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for ride in scores %}
+        <tr>
+          <th scope="row"> {{ ride }}</th>
+          <td>${{ scores[ride]['earnings'] }}</td>
+          <td>{{ scores[ride]['start_address'] }}</td>
+          <td>{{ scores[ride]['end_address'] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+  </table>
 </div>
 {% endblock %}
 

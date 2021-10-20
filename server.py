@@ -1,6 +1,6 @@
 """Server for HopSkipDrive Challenge."""
 
-from flask import Flask, render_template, request, flash, session, redirect, jsonify
+from flask import Flask, render_template, request, session, flash, redirect, jsonify
 import requests
 from jinja2 import StrictUndefined
 from model import connect_to_db, db, Drivers, Rides
@@ -9,7 +9,7 @@ from math import trunc
 
 
 app = Flask(__name__)
-# app.secret_key = "dev" #only used for session?
+app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
 
 API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
@@ -19,15 +19,74 @@ API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
 def homepage():
     """View homepage."""
 
-    return render_template('homepage.html')
+    return render_template('login.html')
+
+
+@app.route("/login", methods=['POST'])
+def handle_login():
+    """Action for login form; log a user in."""
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    driver = Drivers.query.filter_by(email=username).first()
+    print(driver)
+
+    if driver:
+        if password == driver.password:
+            session['driver_full_name'] = driver.full_name
+            session['driver_email'] = driver.email
+            return redirect('/rides')    
+        else:
+            flash('Email and password do not match. Try again.')
+            return redirect ('/')
+    else:
+        flash('No driver with that email. Please create a new profile.')
+        return render_template('signup.html')
+
+
+@app.route('/signup', methods=['GET','POST'])
+def signup():
+    """Create a new user profile."""
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        home_address = request.form.get('address')
+
+        driver = Drivers.query.filter_by(email=email).one()
+        if driver:
+            flash('Account already created with that email. Please login or try another email.')
+            return redirect('/')
+
+        else:
+            crud.create_driver(full_name, email, password, home_address)
+            flash('Account created! Please log in.')
+            return redirect('/')
+    
+    elif request.method == 'GET':
+        return redirect('/rides')
+
+
+@app.route("/logout")
+def logout():
+    """Log out the current user and delete session information"""
+
+    try:
+        del session['driver_full_name']
+        del session['driver_email']
+    except KeyError:
+        pass
+    flash("You are logged out.")
+    return redirect("/")
 
 
 @app.route('/rides')
 def rides():
     """View ranked rides."""
 
-    full_name = request.args.get('full-name')
-    driver_address = db.session.query(Drivers.home_address).filter_by(full_name=full_name).one()
+    driver_address = db.session.query(Drivers.home_address).filter_by(full_name=session['driver_full_name']).one()
     all_rides = Rides.query.all()
 
     drivers_rides = {}
@@ -58,9 +117,6 @@ def rides():
 
     scores = dict(sorted(drivers_rides.items(), key=lambda kv: kv[0], reverse=True))
 
-    print(type(scores))
-    print(scores)
-    
     return render_template("rides.html",
                            scores=scores)
 

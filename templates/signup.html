@@ -1,0 +1,49 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+<div class="container"> 
+
+    <div>
+        {% if session.get('driver_full_name') %}
+          <p class="text-end">Welcome {{ session['driver_full_name'] }}</p>
+        {% else %}
+          <p class="text-end">Not Logged In</p> 
+        {% endif %}
+    </div>
+    
+    <div>
+        {% for message in get_flashed_messages() %}
+          <div>{{ message }}</div>
+        {% endfor %}
+    </div>
+    <br>
+
+    <form action="/signup" method="POST">
+    <h5>Account Information</h5>
+
+        <label>Full Name</label>
+        <input type="text" class="form-control" name="full-name">
+
+        <label>Email</label>
+        <input type="text" class="form-control" name="email">
+
+        <label>Password</label>
+        <input type="text" class="form-control" name="password">
+
+        <label>Home Address</label>
+        <input type="text" class="form-control" name="address">
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block after_body %}{% endblock %} 
