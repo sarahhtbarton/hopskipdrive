@@ -1,0 +1,33 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Score</th>
+            <th scope="col">Earnings</th>
+            <th scope="col">Start Address</th>
+            <th scope="col">End Address</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for ride in drivers_rides %}
+          <tr>
+            <th scope="row"> {{ drivers_rides[ride]["leg1"]["distance"] }}</th>
+            <td>{{ drivers_rides[ride]["leg1"]["duration"] }}</td>
+            <td>{{ drivers_rides[ride]["leg2"]["start_address"] }}</td>
+            <td>{{ drivers_rides[ride]["leg2"]["end_address"] }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block after_body %}{% endblock %} 
