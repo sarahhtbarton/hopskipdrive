@@ -33,7 +33,7 @@ def create_example_data():
 
 
 if __name__ == '__main__':
-    os.system('dropdb hopskipdrive-if-exists')
+    os.system('dropdb hopskipdrive')
     os.system('createdb hopskipdrive')
     model.connect_to_db(server.app)
     model.db.create_all()
