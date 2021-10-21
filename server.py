@@ -1,6 +1,6 @@
 """Server for HopSkipDrive Challenge."""
 
-from flask import Flask, render_template, request, session, flash, redirect, jsonify
+from flask import Flask, render_template, request, session, flash, redirect
 import requests
 from jinja2 import StrictUndefined
 from model import connect_to_db, db, Drivers, Rides
@@ -30,7 +30,6 @@ def handle_login():
     password = request.form.get('password')
 
     driver = Drivers.query.filter_by(email=username).first()
-    print(driver)
 
     if driver:
         if password == driver.password:
@@ -56,6 +55,7 @@ def signup():
         home_address = request.form.get('address')
 
         driver = Drivers.query.filter_by(email=email).one()
+
         if driver:
             flash('Account already created with that email. Please login or try another email.')
             return redirect('/')
