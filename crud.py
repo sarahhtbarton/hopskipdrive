@@ -35,6 +35,12 @@ def create_ride(start_address, end_address):
     return ride
 
 
+def get_rides():
+    """Return all rides"""
+
+    return Rides.query.all()
+
+
 if __name__ == '__main__':
     from server import app
     connect_to_db(app)

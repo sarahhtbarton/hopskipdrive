@@ -90,7 +90,7 @@ def rides():
     """View ranked rides."""
 
     driver_address = crud.get_driver(session['driver_id'])
-    all_rides = Rides.query.all()
+    all_rides = crud.get_rides()
 
     drivers_rides = {}
 
