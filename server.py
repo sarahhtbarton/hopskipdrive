@@ -89,7 +89,7 @@ def logout():
 def rides():
     """View ranked rides."""
 
-    driver_address = db.session.query(Drivers.home_address).filter_by(driver_id=session['driver_id']).one()
+    driver_address = crud.get_driver(session['driver_id'])
     all_rides = Rides.query.all()
 
     drivers_rides = {}
