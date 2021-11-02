@@ -6,6 +6,7 @@ from jinja2 import StrictUndefined
 from model import connect_to_db, db, Drivers, Rides
 import crud
 from math import trunc
+# from driver_service import get_rides()
 
 
 app = Flask(__name__)
@@ -35,6 +36,7 @@ def handle_login():
         if password == driver.password:
             session['driver_full_name'] = driver.full_name
             session['driver_email'] = driver.email
+            session['driver_id'] = driver.driver_id
             return redirect('/rides')    
         else:
             flash('Email and password do not match. Try again.')
@@ -76,6 +78,7 @@ def logout():
     try:
         del session['driver_full_name']
         del session['driver_email']
+        del session['driver_id']
     except KeyError:
         pass
     flash("You are logged out.")
@@ -86,7 +89,7 @@ def logout():
 def rides():
     """View ranked rides."""
 
-    driver_address = db.session.query(Drivers.home_address).filter_by(full_name=session['driver_full_name']).one()
+    driver_address = db.session.query(Drivers.home_address).filter_by(driver_id=session['driver_id']).one()
     all_rides = Rides.query.all()
 
     drivers_rides = {}
@@ -94,6 +97,8 @@ def rides():
     endpoint = 'https://maps.googleapis.com/maps/api/directions/json?'
 
     for record in all_rides:
+        
+        #assemble api request
         parameters = {
             'origin': f"place_id:{driver_address.home_address}",
             'waypoints': f"place_id:{record.start_address}",
@@ -101,20 +106,26 @@ def rides():
             'key': API_KEY
         }
 
+        #make api request
         response = requests.get(endpoint, parameters)
         dict_response = response.json()
 
+        #unpack api response
         ride_distance = float((dict_response['routes'][0]['legs'][1]['distance']['text'])[:-3])
         ride_duration = float((dict_response['routes'][0]['legs'][1]['duration']['text'])[:-5])
         commute_duration = float((dict_response['routes'][0]['legs'][0]['duration']['text'])[:-5])
-        earnings = (ride_distance * .5) + (ride_duration * 15/60)
-        score = trunc(earnings / (commute_duration + ride_duration) * 100)
+        
+        #calculated fields from unpacked api
+        earnings = (ride_distance * .5) + (ride_duration * 15/60) #turn into own function
+        score = trunc(earnings / (commute_duration + ride_duration) * 100) #turn into own function
 
+        #add data to dictionary in order to pass needed fields to table in rides.html
         drivers_rides[score] = {}
         drivers_rides[score]['earnings'] = earnings
         drivers_rides[score]['start_address'] = dict_response['routes'][0]['legs'][1]['start_address']
         drivers_rides[score]['end_address'] = dict_response['routes'][0]['legs'][1]['end_address']
 
+    #sort dictionary by score, descending
     scores = dict(sorted(drivers_rides.items(), key=lambda kv: kv[0], reverse=True))
 
     return render_template("rides.html",
