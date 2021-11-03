@@ -17,10 +17,12 @@ def create_driver(full_name, email, password, home_address):
     return driver
 
 
-def get_driver(primary_key):
-    "Return driver by primary key"
+def get_driver_address(primary_key):
+    "Return driver home address by primary key"
 
-    return db.session.query(Drivers.home_address).filter_by(driver_id=primary_key).one()
+    driver = db.session.query(Drivers).filter_by(driver_id=primary_key).one()
+
+    return driver.home_address
 
 
 def create_ride(start_address, end_address):
