@@ -1,18 +1,17 @@
 """Server for HopSkipDrive Challenge."""
 
 from flask import Flask, render_template, request, session, flash, redirect
-import requests
 from jinja2 import StrictUndefined
 from model import connect_to_db, db, Drivers, Rides
 import crud
-from math import trunc
-# from driver_service import get_rides()
+import services.driver_service as driver_service
 
 
 app = Flask(__name__)
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
 
+#delete from here and put in driver_service.py??
 API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
 
 
@@ -89,44 +88,31 @@ def logout():
 def rides():
     """View ranked rides."""
 
-    driver_address = crud.get_driver(session['driver_id'])
+    driver_address = crud.get_driver_address(session['driver_id'])
+    print(driver_address)
     all_rides = crud.get_rides()
 
     drivers_rides = {}
 
     endpoint = 'https://maps.googleapis.com/maps/api/directions/json?'
 
-    for record in all_rides:
+    for ride in all_rides:
+
+        parameters = driver_service.assemble_api_request(driver_address, ride.start_address, ride.end_address)
         
-        #assemble api request
-        parameters = {
-            'origin': f"place_id:{driver_address.home_address}",
-            'waypoints': f"place_id:{record.start_address}",
-            'destination': f"place_id:{record.end_address}",
-            'key': API_KEY
-        }
+        dict_response = driver_service.make_api_request(endpoint, parameters)
 
-        #make api request
-        response = requests.get(endpoint, parameters)
-        dict_response = response.json()
+        ride_distance, ride_duration, commute_duration, start_address, end_address = driver_service.unpack_api_response(dict_response)
 
-        #unpack api response
-        ride_distance = float((dict_response['routes'][0]['legs'][1]['distance']['text'])[:-3])
-        ride_duration = float((dict_response['routes'][0]['legs'][1]['duration']['text'])[:-5])
-        commute_duration = float((dict_response['routes'][0]['legs'][0]['duration']['text'])[:-5])
+        earnings = driver_service.calculate_earnings(ride_distance, ride_duration)
         
-        #calculated fields from unpacked api
-        earnings = (ride_distance * .5) + (ride_duration * 15/60) #turn into own function
-        score = trunc(earnings / (commute_duration + ride_duration) * 100) #turn into own function
+        score = driver_service.calculate_score(earnings, commute_duration, ride_duration)
 
-        #add data to dictionary in order to pass needed fields to table in rides.html
-        drivers_rides[score] = {}
-        drivers_rides[score]['earnings'] = earnings
-        drivers_rides[score]['start_address'] = dict_response['routes'][0]['legs'][1]['start_address']
-        drivers_rides[score]['end_address'] = dict_response['routes'][0]['legs'][1]['end_address']
+        driver_service.populate_driver_rides_dict(drivers_rides, score, earnings, start_address, end_address)
 
-    #sort dictionary by score, descending
-    scores = dict(sorted(drivers_rides.items(), key=lambda kv: kv[0], reverse=True))
+    scores = driver_service.sort_dictionary(drivers_rides)
+
+    json_scores = driver_service.convert_dict_to_json(scores)
 
     return render_template("rides.html",
                            scores=scores)
