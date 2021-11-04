@@ -75,8 +75,3 @@
 
   * **Code:** 500 Internal Server Error -- Key Error: no authenticated session <br />
     **Content:** `KeyError: 'driver_id'`
-
-<!--## **Sample Call:**
-
-  `curl --cookie "session[driver_id]=2" http://localhost:5000/rides` -->
-

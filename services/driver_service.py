@@ -1,7 +1,6 @@
 """Logic for driver routes"""
 
 from math import trunc
-import json
 
 
 def calculate_earnings(ride_distance, ride_duration):

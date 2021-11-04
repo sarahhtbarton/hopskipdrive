@@ -8,6 +8,7 @@ import services.driver_service as driver_service
 
 
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False #to keep dictionary ordered once jsonified
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
 
