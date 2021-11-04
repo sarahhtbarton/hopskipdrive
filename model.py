@@ -33,10 +33,38 @@ class Rides(db.Model):
                         primary_key=True)
     start_address = db.Column(db.String)
     end_address = db.Column(db.String)
+    ride_distance = db.Column(db.Float)
+    ride_duration = db.Column(db.Float)
 
     def __repr__(self):
         """Show info about Rides"""
         return f"<Rides ride_id={self.ride_id} start_address={self.start_address} end_address={self.end_address}>"
+
+
+class Commutes(db.Model):
+    """Commute times for a driver's potential rides"""
+
+    __tablename__ = 'commutes'
+
+    commute_id = db.Column(db.Integer,
+                           autoincrement=True,
+                           primary_key=True
+                          )
+    driver_id = db.Column(db.Integer,
+                          db.ForeignKey('drivers.driver_id')
+                         )
+    ride_id = db.Column(db.Integer,
+                        db.ForeignKey('rides.ride_id')
+                       )
+    commute_duration = db.Column(db.Float)
+    earnings = db.Column(db.Float)
+    
+    rides = db.relationship('Rides', backref='commute')
+    drivers = db.relationship('Drivers', backref='commute')
+
+    def __repr__(self):
+        """Show info about Commutes"""
+        return f"<Commutes commute_id={self.commute_id} commute_duration={self.commute_duration}>"
 
 
 def connect_to_db(flask_app,
