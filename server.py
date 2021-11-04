@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, request, session, flash, redirect
 from jinja2 import StrictUndefined
-from model import connect_to_db, db, Drivers, Rides
+from model import connect_to_db
 import crud
 import services.driver_service as driver_service
 
@@ -10,9 +10,6 @@ import services.driver_service as driver_service
 app = Flask(__name__)
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
-
-#delete from here and put in driver_service.py??
-API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
 
 
 @app.route('/')
@@ -26,10 +23,10 @@ def homepage():
 def handle_login():
     """Action for login form; log a user in."""
 
-    username = request.form.get('username')
+    email = request.form.get('email')
     password = request.form.get('password')
 
-    driver = Drivers.query.filter_by(email=username).first()
+    driver = crud.get_driver_by_email(email)
 
     if driver:
         if password == driver.password:
@@ -55,7 +52,7 @@ def signup():
         password = request.form.get('password')
         home_address = request.form.get('address')
 
-        driver = Drivers.query.filter_by(email=email).one()
+        driver = crud.get_driver_by_email(email)
 
         if driver:
             flash('Account already created with that email. Please login or try another email.')
@@ -86,36 +83,29 @@ def logout():
 
 @app.route('/rides')
 def rides():
-    """View ranked rides."""
+    """Display ranked rides."""
 
-    driver_address = crud.get_driver_address(session['driver_id'])
-    print(driver_address)
+    driver = crud.get_driver(session['driver_id'])
     all_rides = crud.get_rides()
 
     drivers_rides = {}
 
-    endpoint = 'https://maps.googleapis.com/maps/api/directions/json?'
-
     for ride in all_rides:
 
-        parameters = driver_service.assemble_api_request(driver_address, ride.start_address, ride.end_address)
+        commute = crud.get_or_create_commute(ride, driver)
         
-        dict_response = driver_service.make_api_request(endpoint, parameters)
-
-        ride_distance, ride_duration, commute_duration, start_address, end_address = driver_service.unpack_api_response(dict_response)
-
-        earnings = driver_service.calculate_earnings(ride_distance, ride_duration)
+        score = driver_service.calculate_score(commute.earnings, commute.commute_duration, ride.ride_duration)
         
-        score = driver_service.calculate_score(earnings, commute_duration, ride_duration)
-
-        driver_service.populate_driver_rides_dict(drivers_rides, score, earnings, start_address, end_address)
+        driver_service.populate_driver_rides_dict(drivers_rides, score, commute.earnings, ride.start_address, ride.end_address)
 
     scores = driver_service.sort_dictionary(drivers_rides)
 
     json_scores = driver_service.convert_dict_to_json(scores)
 
-    return render_template("rides.html",
-                           scores=scores)
+    return json_scores
+
+    # return render_template("rides.html",
+    #                        scores=scores)
 
 
 if __name__ == '__main__':
