@@ -1,52 +1,7 @@
 """Logic for driver routes"""
 
-import requests
-import json
 from math import trunc
-
-API_KEY = 'AIzaSyC2PdjW1EgQRKkIYXyL-IZdp7I3XdlberY'
-
-
-def assemble_api_request(origin, waypoints, destination):
-    """assemble request for google directions api"""
-
-    parameters = {
-        'origin': f"place_id:{origin}",
-        'waypoints': f"place_id:{waypoints}",
-        'destination': f"place_id:{destination}",
-        'key': API_KEY #where do you put API Key?
-    }
-    
-    return parameters
-
-
-def make_api_request(endpoint, parameters):
-    """Make api request to google directions api, """
-
-    response = requests.get(endpoint, parameters)
-    dict_response = response.json()
-
-    return dict_response
-
-
-def unpack_api_response(dict_response):
-    """Unpack api responses"""
-
-    ride_distance = float((dict_response['routes'][0]['legs'][1]['distance']['text'])[:-3])
-    ride_duration = float((dict_response['routes'][0]['legs'][1]['duration']['text'])[:-5])
-    commute_duration = float((dict_response['routes'][0]['legs'][0]['duration']['text'])[:-5])
-    start_address = dict_response['routes'][0]['legs'][1]['start_address']
-    end_address = dict_response['routes'][0]['legs'][1]['end_address']
-
-    return ride_distance, ride_duration, commute_duration, start_address, end_address
-
-
-def calculate_earnings(ride_distance, ride_duration):
-    """Calculate driver earnings for a given ride"""
-
-    earnings = (ride_distance * .5) + (ride_duration * 15/60)
-
-    return earnings
+import json
 
 
 def calculate_score(earnings, commute_duration, ride_duration):
@@ -82,4 +37,3 @@ def convert_dict_to_json(dict):
     json_scores = json.dumps(dict)
 
     return json_scores
-
