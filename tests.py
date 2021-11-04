@@ -1,9 +1,12 @@
 import unittest
+from unittest.case import TestCase
 from server import app
 import server
 from model import Drivers, connect_to_db, db
 from seed import create_example_data
 from flask import session
+import services.driver_service as driver_service
+import crud
 
 
 class FlaskTestsBasic(unittest.TestCase):
@@ -18,11 +21,6 @@ class FlaskTestsBasic(unittest.TestCase):
         """Test homepage page."""
         result = self.client.get("/")
         self.assertIn(b"Account Sign In", result.data)
-
-    def test_new_users(self):
-        """Test user profile creation page."""
-        result = self.client.get('/signup', follow_redirects=True)
-        self.assertIn(b"Account Information", result.data)
 
 
 class FlaskTestsDatabase(unittest.TestCase):
@@ -42,6 +40,7 @@ class FlaskTestsDatabase(unittest.TestCase):
             with c.session_transaction() as sess:
                 sess['driver_full_name'] = "Will Fox"
                 sess['driver_email'] = "will@gmail.com"
+                sess['driver_id'] = 2
 
     def tearDown(self):                            
         """Do at end of every test."""
@@ -52,8 +51,9 @@ class FlaskTestsDatabase(unittest.TestCase):
 
     def test_rides(self):          
         """Test rides page."""
-        result = self.client.get("/rides")
-        self.assertIn(b"Earnings", result.data)
+        
+        result = self.client.get("/rides", data={"email": "will@gmail.com", "password": "password123"}, follow_redirects=True)
+        self.assertIn(b"earnings", result.data)
 
     def test_find_driver(self):
         """Can we find a driver in the sample data?"""
@@ -61,30 +61,34 @@ class FlaskTestsDatabase(unittest.TestCase):
         will = Drivers.query.filter(Drivers.full_name == "Will Fox").first()
         self.assertEqual(will.full_name, "Will Fox")
 
-    def test_rides_page(self):               
-        """Test ride view page."""
-
-        result = self.client.get("/rides", data={"username": "will@gmail.com", "password": "password123"},
-                              follow_redirects=True)
-        self.assertIn(b"Score", result.data)
-
-    def test_login(self):                         
-        """Test log in form."""
-
-        result = self.client.post("/login", data={'username': 'will@gmail.com', 'password': 'password123'}, follow_redirects=True)
-        self.assertIn(b"Welcome Will", result.data)
-
     def test_logout(self):
         """Test logout route."""
 
         with self.client as c:
             with c.session_transaction() as sess:
                 sess['driver_email'] = 'will@gmail.com'
+                sess['driver_id'] = 2
 
             result = self.client.get('/logout', follow_redirects=True)
 
             self.assertNotIn(b'driver_email', session)
             self.assertIn(b'Account Sign In', result.data)
+
+
+class DriverServiceTests(unittest.TestCase):
+    """Driver Service logic unit tests"""
+
+    def test_earnings(self):
+        assert driver_service.calculate_earnings(20, 60) == 25
+    
+    def test_score(self):
+         assert driver_service.calculate_score(10, 40, 60) == 10
+    
+    def test_dict_sort(self):
+        assert driver_service.sort_dictionary({1: 'a', 3:'c', 2:'b'}) == {3:'c', 2:'b', 1: 'a'}
+
+    def test_dumps(self):
+        assert isinstance(driver_service.convert_dict_to_json({3:'c', 2:'b', 1: 'a'}), str)
 
 
 class MockAPITests(unittest.TestCase):
@@ -104,6 +108,7 @@ class MockAPITests(unittest.TestCase):
             with c.session_transaction() as sess:
                 sess['driver_email'] = "will@gmail.com"
                 sess['driver_full_name'] = "Will Fox"
+                sess['driver_id'] = 2
 
         def _mock_get_distance_api(waypoints):
             """Mock test of API call"""
