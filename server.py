@@ -1,6 +1,6 @@
 """Server for HopSkipDrive Challenge."""
 
-from flask import Flask, render_template, request, session, flash, redirect
+from flask import Flask, render_template, request, session, flash, redirect, jsonify
 from jinja2 import StrictUndefined
 from model import connect_to_db
 import crud
@@ -100,9 +100,7 @@ def rides():
 
     scores = driver_service.sort_dictionary(drivers_rides)
 
-    json_scores = driver_service.convert_dict_to_json(scores)
-
-    return json_scores
+    return jsonify(scores)
 
     # return render_template("rides.html",
     #                        scores=scores)

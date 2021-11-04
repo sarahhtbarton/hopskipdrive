@@ -37,11 +37,3 @@ def sort_dictionary(drivers_rides):
     scores = dict(sorted(drivers_rides.items(), key=lambda kv: kv[0], reverse=True))
 
     return scores
-
-
-def convert_dict_to_json(dict):
-    """Conver dictionary into json object"""
-
-    json_scores = json.dumps(dict)
-
-    return json_scores

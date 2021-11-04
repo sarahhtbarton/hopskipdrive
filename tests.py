@@ -86,9 +86,6 @@ class DriverServiceTests(unittest.TestCase):
     def test_dict_sort(self):
         assert driver_service.sort_dictionary({1: 'a', 3:'c', 2:'b'}) == {3:'c', 2:'b', 1: 'a'}
 
-    def test_dumps(self):
-        assert isinstance(driver_service.convert_dict_to_json({3:'c', 2:'b', 1: 'a'}), str)
-
 
 class MockAPITests(unittest.TestCase):
     """Flask tests that use the database and mock API call."""
