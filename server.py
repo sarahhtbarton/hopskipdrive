@@ -93,10 +93,10 @@ def rides():
     for ride in all_rides:
 
         commute = crud.get_or_create_commute(ride, driver)
+        earnings = driver_service.calculate_earnings(ride.ride_distance, ride.ride_duration)
+        score = driver_service.calculate_score(earnings, commute.commute_duration, ride.ride_duration)
         
-        score = driver_service.calculate_score(commute.earnings, commute.commute_duration, ride.ride_duration)
-        
-        driver_service.populate_driver_rides_dict(drivers_rides, score, commute.earnings, ride.start_address, ride.end_address)
+        driver_service.populate_driver_rides_dict(drivers_rides, score, earnings, ride.start_address, ride.end_address)
 
     scores = driver_service.sort_dictionary(drivers_rides)
 
