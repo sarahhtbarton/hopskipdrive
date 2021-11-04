@@ -4,6 +4,14 @@ from math import trunc
 import json
 
 
+def calculate_earnings(ride_distance, ride_duration):
+    """Calculate driver earnings for a given ride"""
+
+    earnings = (ride_distance * .5) + (ride_duration * 15/60)
+
+    return earnings
+    
+
 def calculate_score(earnings, commute_duration, ride_duration):
     """Calculate score (out of 100) of a given ride"""
 

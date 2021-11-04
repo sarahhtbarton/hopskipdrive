@@ -1,6 +1,6 @@
 """CRUD operations."""
 
-from model import Commutes, db, connect_to_db, Drivers, Rides, Commutes
+from model import db, connect_to_db, Drivers, Rides, Commutes
 from configuration.api_key import API_KEY
 import requests
 
@@ -28,7 +28,7 @@ def get_driver(primary_key):
 def get_driver_by_email(email):
     """Return driver by email"""
 
-    return Drivers.query.filter_by(email=email).one()
+    return db.session.query(Drivers).filter_by(email=email).first()
 
 
 def create_ride(start_address, end_address, ride_distance, ride_duration):
@@ -52,13 +52,12 @@ def get_rides():
     return Rides.query.all()
 
 
-def create_commute(driver_id, ride_id, commute_duration, earnings):
+def create_commute(driver_id, ride_id, commute_duration):
     """Create and return commute"""
 
     commute = Commutes(driver_id=driver_id,
                        ride_id=ride_id,
-                       commute_duration=commute_duration,
-                       earnings=earnings
+                       commute_duration=commute_duration
                       )
     db.session.add(commute)
     db.session.commit()
@@ -74,20 +73,12 @@ def get_or_create_commute(ride, driver):
     if commute_check:
         commute = get_commute(commute_check.commute_id)
     else:
-        commute = create_commute_logic(driver, ride)
+        commute = make_commute_request(driver, ride)
     
     return commute
 
 
-def calculate_earnings(ride_distance, ride_duration):
-    """Calculate driver earnings for a given ride"""
-
-    earnings = (ride_distance * .5) + (ride_duration * 15/60)
-
-    return earnings
-
-
-def create_commute_logic(driver, ride):
+def make_commute_request(driver, ride):
     """Computes commute for given driver and ride"""
 
     endpoint = 'https://maps.googleapis.com/maps/api/directions/json?'
@@ -102,10 +93,8 @@ def create_commute_logic(driver, ride):
     dict_response = response.json()
 
     commute_duration = float((dict_response['routes'][0]['legs'][0]['duration']['text'])[:-5])
-    
-    earnings = calculate_earnings(ride.ride_distance, ride.ride_duration)
 
-    commute = create_commute(driver.driver_id, ride.ride_id, commute_duration, earnings)
+    commute = create_commute(driver.driver_id, ride.ride_id, commute_duration)
 
     return commute
 
