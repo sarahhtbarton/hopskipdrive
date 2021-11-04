@@ -2,15 +2,15 @@
 ----
   Returns json data about rides available to a driver. Data includes score, earnings, ride start address, and ride end address, and is ordered descending by score.
 
-**URL**
+## **URL**
 
   /rides
 
-**Method:**
+## **Method:**
   
   `GET`
   
-**URL Params**
+## **URL Params**
 
    **Required:**
  
@@ -20,16 +20,17 @@
  
    None
 
-**Data Params**
+## **Data Params**
 
   None
 
-**Authentication:**
+## **Authentication:**
 
   **Required**
+
   Need to call /rides with an authenticated session -- driver must first login on homepage.
 
-**Success Response:**
+## **Success Response:**
 
   * **Code:** 200 <br />
     **Sample Response:** `{
@@ -70,12 +71,12 @@
   }
 }`
  
-**Error Response:**
+## **Error Response:**
 
   * **Code:** 500 Internal Server Error -- Key Error: no authenticated session <br />
     **Content:** `KeyError: 'driver_id'`
 
-<!-- **Sample Call:**
+<!--## **Sample Call:**
 
   `curl --cookie "session[driver_id]=2" http://localhost:5000/rides` -->
 
