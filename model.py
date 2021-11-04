@@ -57,7 +57,6 @@ class Commutes(db.Model):
                         db.ForeignKey('rides.ride_id')
                        )
     commute_duration = db.Column(db.Float)
-    earnings = db.Column(db.Float)
     
     rides = db.relationship('Rides', backref='commute')
     drivers = db.relationship('Drivers', backref='commute')
