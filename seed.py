@@ -16,7 +16,8 @@ def seed_drivers():
             crud.create_driver(row['full_name'],
                                row['email'],
                                row['password'],
-                               row['place_id'])
+                               row['place_id']
+                               )
 
 
 def seed_rides():
@@ -26,7 +27,10 @@ def seed_rides():
         rides_reader = csv.DictReader(rides_csv)
         for row in rides_reader:
             crud.create_ride(row['start_address'], 
-                            row['end_address'])
+                             row['end_address'],
+                             row['ride_distance'],
+                             row['ride_duration']
+                            )
 
 
 def create_example_data():
